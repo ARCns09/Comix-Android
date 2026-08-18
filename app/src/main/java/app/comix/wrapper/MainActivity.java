@@ -8,6 +8,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.view.Window;
+import android.view.WindowInsets;
 import android.webkit.CookieManager;
 import android.webkit.URLUtil;
 import android.webkit.WebChromeClient;
@@ -57,7 +58,20 @@ public class MainActivity extends Activity {
 
         webView = new WebView(this);
         webView.setBackgroundColor(Color.rgb(17, 20, 24));
+
+        webView.setOnApplyWindowInsetsListener((v, insets) -> {
+            if (android.os.Build.VERSION.SDK_INT >= 30) {
+                android.graphics.Insets bars = insets.getInsets(
+                    WindowInsets.Type.statusBars() |
+                    WindowInsets.Type.displayCutout()
+                );
+                v.setPadding(0, bars.top, 0, 0);
+            }
+            return insets;
+        });
+
         setContentView(webView);
+        webView.requestApplyInsets();
 
         WebSettings s = webView.getSettings();
         s.setJavaScriptEnabled(true);

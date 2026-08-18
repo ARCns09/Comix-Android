@@ -18,6 +18,11 @@ import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.Toast;
+import android.widget.LinearLayout;
+import android.widget.TextView;
+import android.widget.ImageView;
+import android.view.Gravity;
+import android.graphics.Typeface;
 
 import java.io.ByteArrayInputStream;
 import java.util.Arrays;
@@ -59,19 +64,7 @@ public class MainActivity extends Activity {
         webView = new WebView(this);
         webView.setBackgroundColor(Color.rgb(17, 20, 24));
 
-        webView.setOnApplyWindowInsetsListener((v, insets) -> {
-            if (android.os.Build.VERSION.SDK_INT >= 30) {
-                android.graphics.Insets bars = insets.getInsets(
-                    WindowInsets.Type.statusBars() |
-                    WindowInsets.Type.displayCutout()
-                );
-                v.setPadding(0, bars.top, 0, 0);
-            }
-            return insets;
-        });
-
-        setContentView(webView);
-        webView.requestApplyInsets();
+        setupAppLayout();
 
         WebSettings s = webView.getSettings();
         s.setJavaScriptEnabled(true);
@@ -187,6 +180,74 @@ public class MainActivity extends Activity {
                 "utf-8",
                 new ByteArrayInputStream(new byte[0])
         );
+    }
+
+
+    private int dp(int value) {
+        return Math.round(value * getResources().getDisplayMetrics().density);
+    }
+
+    private void setupAppLayout() {
+        LinearLayout root = new LinearLayout(this);
+        root.setOrientation(LinearLayout.VERTICAL);
+        root.setBackgroundColor(Color.rgb(17, 20, 24));
+
+        LinearLayout toolbar = new LinearLayout(this);
+        toolbar.setOrientation(LinearLayout.HORIZONTAL);
+        toolbar.setGravity(Gravity.CENTER_VERTICAL);
+        toolbar.setPadding(dp(16), 0, dp(12), 0);
+        toolbar.setBackgroundColor(Color.rgb(32, 39, 43));
+
+        ImageView icon = new ImageView(this);
+        icon.setImageResource(app.comix.wrapper.R.drawable.comix_icon);
+        icon.setScaleType(ImageView.ScaleType.CENTER_CROP);
+
+        LinearLayout.LayoutParams iconParams =
+                new LinearLayout.LayoutParams(dp(32), dp(32));
+        iconParams.setMarginEnd(dp(12));
+        toolbar.addView(icon, iconParams);
+
+        TextView title = new TextView(this);
+        title.setText("Comix");
+        title.setTextColor(Color.WHITE);
+        title.setTextSize(18);
+        title.setTypeface(Typeface.DEFAULT, Typeface.BOLD);
+
+        LinearLayout.LayoutParams titleParams =
+                new LinearLayout.LayoutParams(0, dp(48), 1f);
+        title.setGravity(Gravity.CENTER_VERTICAL);
+        toolbar.addView(title, titleParams);
+
+        TextView refresh = new TextView(this);
+        refresh.setText("↻");
+        refresh.setTextColor(Color.WHITE);
+        refresh.setTextSize(25);
+        refresh.setGravity(Gravity.CENTER);
+        refresh.setOnClickListener(v -> webView.reload());
+
+        toolbar.addView(
+                refresh,
+                new LinearLayout.LayoutParams(dp(48), dp(48))
+        );
+
+        root.addView(
+                toolbar,
+                new LinearLayout.LayoutParams(
+                        LinearLayout.LayoutParams.MATCH_PARENT,
+                        dp(52)
+                )
+        );
+
+        root.addView(
+                webView,
+                new LinearLayout.LayoutParams(
+                        LinearLayout.LayoutParams.MATCH_PARENT,
+                        0,
+                        1f
+                )
+        );
+
+        setContentView(root);
     }
 
     private void configureSystemBars() {
